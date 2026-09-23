@@ -1,16 +1,16 @@
 """
-BMI Calculator (Body Mass Index) - Version 2.0
+BMI Calculator (Body Mass Index) - Version 2.1
 A command-line tool to calculate BMI, analyze health categories,
-and suggest ideal weight ranges with bilingual support (English and Traditional Chinese / 繁體中文).
+and suggest ideal weight ranges with multilingual support:
+English, Traditional Chinese (繁體中文), Japanese (日本語), and Korean (한국어).
 """
 
 import argparse
-import sys
 from typing import Callable, Tuple
 
 MESSAGES = {
     "en": {
-        "title": "Welcome to the BMI Calculator (v2.0)",
+        "title": "Welcome to the BMI Calculator (v2.1)",
         "quit_hint": "Type 'q' or 'exit' anytime to quit.",
         "prompt_height": "Enter your height (in cm or meters, e.g. 175 or 1.75): ",
         "prompt_weight": "Enter your weight (in kg, e.g. 68.5): ",
@@ -44,7 +44,7 @@ MESSAGES = {
         "adv_severe_obesity": "Medical supervision and specialized health consultation are strongly recommended.",
     },
     "zh-tw": {
-        "title": "歡迎使用 BMI 計算機 (v2.0)",
+        "title": "歡迎使用 BMI 計算機 (v2.1)",
         "quit_hint": "隨時輸入 'q' 或 'exit' 即可退出程式。",
         "prompt_height": "請輸入您的身高（公分或公尺，例如 175 或 1.75）：",
         "prompt_weight": "請輸入您的體重（公斤，例如 68.5）：",
@@ -77,16 +77,88 @@ MESSAGES = {
         "adv_moderate_obesity": "建議尋求醫師或營養專科團隊規劃個人化減重方案。",
         "adv_severe_obesity": "強烈建議接受專業醫療諮詢與減重門診全面評估。",
     },
+    "ja": {
+        "title": "BMI 計算機へようこそ (v2.1)",
+        "quit_hint": "'q' または 'exit' を入力するといつでも終了できます。",
+        "prompt_height": "身長を入力してください（cm または m、例: 175 または 1.75）: ",
+        "prompt_weight": "体重を入力してください（kg、例: 68.5）: ",
+        "prompt_again": "もう一度計算しますか？ (Y/n): ",
+        "goodbye": "BMI 計算機をご利用いただきありがとうございました。健康にお過ごしください！",
+        "exit_msg": "\nBMI 計算機を終了しました。さようなら！",
+        "invalid_input": "無効な入力です",
+        "try_again": "もう一度お試しください（終了する場合は 'q' を入力）。",
+        "err_height_positive": "身長は 0 より大きい必要があります。",
+        "err_weight_positive": "体重は 0 より大きい必要があります。",
+        "err_height_range": "身長 {val:.2f}m は人間の標準的な範囲 (0.5m - 2.8m) 外です。",
+        "err_weight_range": "体重 {val:.1f}kg は人間の標準的な範囲 (10kg - 500kg) 外です。",
+        "report_header": "BMI 健康分析レポート",
+        "lbl_height": "身長",
+        "lbl_weight": "体重",
+        "lbl_bmi": "BMI 数値",
+        "lbl_category": "判定",
+        "lbl_ideal_weight": "適正体重範囲",
+        "lbl_advice": "健康アドバイス",
+        "cat_underweight": "低体重・やせ型 (Underweight)",
+        "cat_normal": "普通体重 (Normal Weight)",
+        "cat_overweight": "肥満予備軍・過体重 (Overweight)",
+        "cat_mild_obesity": "肥満（1度）",
+        "cat_moderate_obesity": "肥満（2度）",
+        "cat_severe_obesity": "肥満（3度以上・高度肥満）",
+        "adv_underweight": "医師や管理栄養士に相談し、バランスの良い栄養摂取を心がけましょう。",
+        "adv_normal": "素晴らしいです！現在のバランスの取れた食事と適度な運動を維持しましょう。",
+        "adv_overweight": "食事のカロリー摂取量を見直し、有酸素運動を少しずつ増やしていきましょう。",
+        "adv_mild_obesity": "生活習慣と食事を見直し、定期的に血圧や血糖値などを確認しましょう。",
+        "adv_moderate_obesity": "医師や専門チームと相談し、計画的な体重管理プログラムを検討してください。",
+        "adv_severe_obesity": "専門医による診察やメディカルダイエット指導を受けることを強く推奨します。",
+    },
+    "ko": {
+        "title": "BMI 계산기에 오신 것을 환영합니다 (v2.1)",
+        "quit_hint": "언제든지 'q' 또는 'exit'를 입력하여 종료할 수 있습니다.",
+        "prompt_height": "키를 입력하세요 (cm 또는 m, 예: 175 또는 1.75): ",
+        "prompt_weight": "몸무게를 입력하세요 (kg, 예: 68.5): ",
+        "prompt_again": "다시 계산하시겠습니까? (Y/n): ",
+        "goodbye": "BMI 계산기를 이용해 주셔서 감사합니다. 늘 건강하세요!",
+        "exit_msg": "\nBMI 계산기를 종료합니다. 안녕히 가세요!",
+        "invalid_input": "잘못된 입력입니다",
+        "try_again": "다시 입력해 주세요 (종료하려면 'q' 입력).",
+        "err_height_positive": "키는 0보다 커야 합니다.",
+        "err_weight_positive": "몸무게는 0보다 커야 합니다.",
+        "err_height_range": "키 {val:.2f}m는 일반적인 사람의 범위(0.5m ~ 2.8m)를 벗어났습니다.",
+        "err_weight_range": "몸무게 {val:.1f}kg는 일반적인 사람의 범위(10kg ~ 500kg)를 벗어났습니다.",
+        "report_header": "BMI 건강 분석 결과",
+        "lbl_height": "신장(키)",
+        "lbl_weight": "체중(몸무게)",
+        "lbl_bmi": "BMI 수치",
+        "lbl_category": "비만도 분류",
+        "lbl_ideal_weight": "적정 체중 범위",
+        "lbl_advice": "건강 권장사항",
+        "cat_underweight": "저체중 (Underweight)",
+        "cat_normal": "정상 체중 (Normal Weight)",
+        "cat_overweight": "과체중 (Overweight)",
+        "cat_mild_obesity": "경도 비만 (1단계)",
+        "cat_moderate_obesity": "중등도 비만 (2단계)",
+        "cat_severe_obesity": "고도 비만 (3단계)",
+        "adv_underweight": "전문가와 상담하여 균형 잡힌 영양 섭취 계획을 세우는 것이 좋습니다.",
+        "adv_normal": "훌륭합니다! 현재의 건강한 식습관과 규칙적인 운동을 꾸준히 유지하세요.",
+        "adv_overweight": "식사량을 조절하고 유산소 운동 빈도를 점진적으로 늘려보세요.",
+        "adv_mild_obesity": "생활 습관 및 식단을 개선하고 정기적으로 건강 상태를 점검하세요.",
+        "adv_moderate_obesity": "의사 또는 영양 전문가의 도움을 받아 체계적인 체중 감량을 권장합니다.",
+        "adv_severe_obesity": "전문 의료진의 진료 및 맞춤형 건강 관리 치료를 강력히 권장합니다.",
+    },
 }
 
 
 def normalize_lang(lang: str) -> str:
-    """Normalize language code to supported keys ('en' or 'zh-tw')."""
+    """Normalize language code to supported keys ('en', 'zh-tw', 'ja', 'ko')."""
     if not lang:
         return "en"
     lang_clean = lang.lower().strip().replace("_", "-")
     if lang_clean in ("zh", "zh-tw", "zh-hant", "tw", "2"):
         return "zh-tw"
+    if lang_clean in ("ja", "jp", "japanese", "3"):
+        return "ja"
+    if lang_clean in ("ko", "kr", "korean", "4"):
+        return "ko"
     return "en"
 
 
@@ -213,24 +285,24 @@ def prompt_input(prompt_text: str, parser_func: Callable[[str], float], lang: st
 def choose_language_interactively() -> str:
     """Prompt user to choose language when not supplied via CLI argument."""
     print("=" * 54)
-    print("  Language Selection / 語言選擇")
+    print("  Language Selection / 語言選擇 / 言語選択 / 언어 선택")
     print("  1. English (Default)")
     print("  2. 繁體中文 (Traditional Chinese - zh-tw)")
+    print("  3. 日本語 (Japanese - ja)")
+    print("  4. 한국어 (Korean - ko)")
     print("=" * 54)
-    choice = input("Please select [1/2] (預設為 1): ").strip()
-    if choice in ("2", "zh", "zh-tw", "tw"):
-        return "zh-tw"
-    return "en"
+    choice = input("Please select [1/2/3/4] (預設為 1): ").strip()
+    return normalize_lang(choice)
 
 
 def main() -> None:
     """Main CLI entrypoint."""
-    parser = argparse.ArgumentParser(description="Bilingual BMI Calculator (English & zh-tw)")
+    parser = argparse.ArgumentParser(description="Multilingual BMI Calculator (en, zh-tw, ja, ko)")
     parser.add_argument(
         "--lang",
-        choices=["en", "zh-tw", "zh"],
+        choices=["en", "zh-tw", "zh", "ja", "ko"],
         default=None,
-        help="UI Language (en or zh-tw)",
+        help="UI Language (en, zh-tw, ja, ko)",
     )
     args = parser.parse_args()
 
@@ -253,7 +325,7 @@ def main() -> None:
             display_report(height, weight, bmi, lang)
 
             again = input(get_text("prompt_again", lang)).strip().lower()
-            if again in ("n", "no", "q", "quit", "exit", "否"):
+            if again in ("n", "no", "q", "quit", "exit", "否", "いいえ", "아니오"):
                 print(get_text("goodbye", lang))
                 break
             print()
