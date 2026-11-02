@@ -159,12 +159,19 @@ elif menu == "✍️ 快速記帳":
         target_categories = categories_expense if actual_type == "expense" else categories_income
         category_options = {f"{c['icon']} {c['name']}": c["id"] for c in target_categories}
 
+        # 初始化記憶日期至 session_state（預設為今天）
+        if "last_record_date" not in st.session_state:
+            st.session_state["last_record_date"] = date.today()
+
+        # 日期選擇器放在表單外，記憶使用者選過的日期，連續記同一天免重複選擇
+        r_date = st.date_input("交易日期", value=st.session_state["last_record_date"], key="input_record_date")
+        st.session_state["last_record_date"] = r_date
+
         with st.form("record_form", clear_on_submit=True):
             f_col1, f_col2 = st.columns(2)
             with f_col1:
                 selected_cat_name = st.selectbox("選擇分類", list(category_options.keys()))
                 selected_cat_id = category_options[selected_cat_name] if category_options else None
-                r_date = st.date_input("交易日期", value=date.today())
 
             with f_col2:
                 amount = st.number_input("金額 (NT$)", min_value=1.0, value=100.0, step=10.0, format="%.0f")
