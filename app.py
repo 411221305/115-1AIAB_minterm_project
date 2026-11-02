@@ -152,17 +152,19 @@ elif menu == "✍️ 快速記帳":
     if not accounts:
         st.error("目前尚無任何帳戶，請先至「自訂分類與帳戶」頁面建立帳戶！")
     else:
+        # 收支類型放在表單外，切換時即時觸發頁面重繪更新對應的分類選項
+        r_type = st.radio("收支類型", ["支出 (Expense)", "收入 (Income)"], horizontal=True, key="quick_record_type")
+        actual_type = "expense" if "支出" in r_type else "income"
+
+        target_categories = categories_expense if actual_type == "expense" else categories_income
+        category_options = {f"{c['icon']} {c['name']}": c["id"] for c in target_categories}
+
         with st.form("record_form", clear_on_submit=True):
             f_col1, f_col2 = st.columns(2)
             with f_col1:
-                r_type = st.radio("收支類型", ["支出 (Expense)", "收入 (Income)"], horizontal=True)
-                actual_type = "expense" if "支出" in r_type else "income"
-
-                target_categories = categories_expense if actual_type == "expense" else categories_income
-                category_options = {f"{c['icon']} {c['name']}": c["id"] for c in target_categories}
-
                 selected_cat_name = st.selectbox("選擇分類", list(category_options.keys()))
                 selected_cat_id = category_options[selected_cat_name] if category_options else None
+                r_date = st.date_input("交易日期", value=date.today())
 
             with f_col2:
                 amount = st.number_input("金額 (NT$)", min_value=1.0, value=100.0, step=10.0, format="%.0f")
@@ -170,8 +172,7 @@ elif menu == "✍️ 快速記帳":
                 selected_acc_name = st.selectbox("選擇支付/存入帳戶", list(account_options.keys()))
                 selected_acc_id = account_options[selected_acc_name]
 
-            r_date = st.date_input("交易日期", value=date.today())
-            note = st.text_input("備註說明 (選填)", placeholder="例如：午餐雞腿便當、7-11 咖啡...")
+            note = st.text_input("備註說明 (選填)", placeholder="例如：午餐雞腿便當、7-11 咖啡、薪水入帳...")
 
             submitted = st.form_submit_button("💾 儲存這筆紀錄", use_container_width=True)
             if submitted:
@@ -189,6 +190,7 @@ elif menu == "✍️ 快速記帳":
                     if success:
                         st.success(f"🎉 記帳成功！【{r_type.split()[0]}】NT$ {amount:,.0f}（{selected_cat_name}）已記錄。")
                         st.balloons()
+                        st.rerun()
                     else:
                         st.error("儲存失敗，請檢查輸入數值！")
 
